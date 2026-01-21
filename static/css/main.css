@@ -1,0 +1,1739 @@
+/*-------------------------------------
+  1. ROOT & UNIVERSAL DESIGN TOKENS
+--------------------------------------*/
+:root {
+  
+  --site-font: 'Public Sans', sans-serif;
+
+  /* Universal Spacing System */
+  --gutter-x: clamp(1rem, 2vw, 1.5rem);
+  --gutter-top: clamp(5.75rem, 10vh, 10rem);
+  --gutter-bottom: clamp(1rem, 3vh, 2rem); /* Bottom spacing for content sections */
+  
+  /* Masonry Specific */
+  --masonry-gap-x: clamp(0.5rem, 1vw, 0.75rem);
+  --masonry-gap-y: clamp(0.5rem, 1vw, 0.75rem);
+
+  /* Info Max Width - subject to change */
+  --content-max-width: 575px; /* Text content (info page) */
+  
+  /* Animation & Interaction */
+  --card-hover-scale: 1.0295;
+  --card-hover-duration: 55ms;
+  --card-hover-ease: cubic-bezier(0.15, .06, 0.75, .95);
+  --caption-offset-y: -1.85px;
+  --caption-fade-duration: 95ms;
+  --caption-fade-ease: cubic-bezier(0.425, .0, 1, 1);
+}
+
+@media (max-width: 480px) {
+  :root {
+    --gutter-x: .5rem; /* Override for mobile */
+    --masonry-gap-x: 0.5rem;
+    --masonry-gap-y: 0.5rem;
+  }
+}
+
+.invisible-footer {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+body {
+  font-family: var(--site-font);
+}
+
+h1, h2, h3, h4, h5, h6,
+button, input, textarea, select {
+  font-family: var(--site-font);
+}
+
+/*-------------------------------------
+  2. MASONRY GALLERY & CARDS
+--------------------------------------*/
+.gallery-section {
+  margin-top: var(--gutter-top);
+  padding-inline: var(--gutter-x);
+  width: 100%;
+
+}
+
+.masonry {
+  column-count: 6;
+  column-gap: var(--masonry-gap-x);
+  padding-bottom: var(--gutter-bottom);
+}
+
+/* Masonry Responsive Breakpoints */
+@media (max-width: 2175px) { .masonry { column-count: 5; } }
+@media (max-width: 1600px) { .masonry { column-count: 4; } }
+@media (max-width: 1140px) { .masonry { column-count: 3; } }
+@media (max-width: 850px)  { .masonry { column-count: 2; } }
+@media (max-width: 576px) {
+  :root {
+    --card-hover-scale: 1.0125; /* ↓ smaller hover on single column */
+  }
+
+  .masonry {
+    column-count: 1;
+    padding-top: 1.275rem;
+  }
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: var(--masonry-gap-y);
+  display: block;
+}
+
+.image-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  will-change: transform;
+  transition: transform var(--card-hover-duration) var(--card-hover-ease);
+}
+
+.card-main-media {
+  width: 100%;
+  display: block;
+  height: auto;
+  object-fit: cover;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .image-card:hover { transform: scale(var(--card-hover-scale)); }
+}
+
+/* Captions */
+.image-caption {
+  position: absolute;
+  bottom: 5%; left: 50%;
+
+  /* Tighter padding / smaller margins */
+  padding: 0.485rem 0.68rem;
+
+  background: rgba(0, 0, 0, 0.75);
+  opacity: 0;
+  transform: translate(-50%, var(--caption-offset-y));
+  transition: opacity var(--caption-fade-duration) var(--caption-fade-ease),
+              transform var(--caption-fade-duration) var(--caption-fade-ease);
+}
+
+.image-caption h5 { margin: 0; 
+  font-size: 0.925rem;
+  font-weight: 300; /* Regular */
+color: #ffffff;
+text-align: center;
+ margin-top: 0px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .image-card:hover .image-caption {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.image-link { text-decoration: none; color: inherit; display: block; }
+.card-overlay-link { position: absolute; inset: 0; z-index: 5; }
+
+/*-------------------------------------
+  3. FULLSCREEN PROJECT OVERLAY
+--------------------------------------*/
+.project-page {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+
+  background: #111;
+  z-index: 10;
+  display: none; /* Immediate hide - no escape for child z-indexes */
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.project-page.is-active {
+  display: flex; /* Show immediately */
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.project-header { position: absolute; top: 1rem; left: 1rem; z-index: 2; }
+
+/* Info Container (Markdown Content) */
+.info-container {
+  max-width: var(--content-max-width);
+  /* Use --gutter-top for the first value (top) */
+  /* Keep auto for sides, and --gutter-bottom for the bottom */
+  margin: var(--gutter-top) auto var(--gutter-bottom) auto;
+  
+  padding: 0 var(--gutter-x);
+  color: var(--fg);
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+@media (max-width: 480px) {
+  .info-container { 
+    max-width: 95%; /* Full width on mobile */
+  }
+}
+
+.info-container a { color: inherit; text-decoration: underline; }
+.info-container p { margin-bottom: 1.5rem; }
+
+/* Info Tab (Overlay UI) */
+/*-------------------------------------
+  INFO TAB - Museum Card Style
+--------------------------------------*/
+
+/* Info Tab Button Positioning */
+.info-tab {
+  position: absolute;
+  bottom: var(--ix-button-y);
+  right: var(--ix-button-x);
+  z-index: 3!important;
+  -webkit-transform: translateZ(10px);
+    transform: translateZ(10px);
+}
+
+/* Info Button */
+.info-button {
+  width: var(--ix-button-sq);
+  height: var(--ix-button-sq);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--ui-bg-dark);
+  color: white;
+  border-radius: 6px;
+  border: none;
+  box-shadow: var(--ui-shadow);
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+  position: relative;
+}
+
+.info-button:hover {
+  box-shadow: var(--ui-shadow-hover);
+  background: rgba(35, 35, 35, 0.95);
+}
+
+/* Hide button when content is shown */
+.info-button[aria-expanded="true"] {
+  display: none;
+}
+
+/* Info Content - Horizontal Museum Card */
+.info-content {
+  /* Position relative to parent .info-tab - ORIGINAL POSITIONING */
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  
+  /* Hide by default */
+  display: none;
+  
+  /* Horizontal card dimensions */
+  width: 320px;
+  max-width: 95vw;
+  
+  /* Museum card styling */
+  background: white;
+  color: var(--fg);
+  
+  /* Tighter padding for horizontal layout */
+  padding: 1.1rem 1.1rem 1.5rem 1.1rem;
+  
+  /* Subtle shadow for depth */
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  
+  /* Modern, calm aesthetic */
+  border-radius: 2px;
+  
+  font-family: var(--site-font);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  
+  z-index: 3 !important;
+}
+
+/* Show state */
+.info-content.is-visible {
+  display: block;
+}
+
+/* Typography - Museum label inspired */
+.info-content p {
+  margin-bottom: 0.5rem;   /* Tight grouping for specs */
+  color: var(--fg);
+  line-height: 1.6;
+}
+
+
+.info-content p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* Category labels - all caps small */
+.info-content strong {
+  font-weight: 800;
+  color: var(--cb-80);
+  text-transform: uppercase;
+  font-size: 0.7em;
+  letter-spacing: 0.5px;
+  margin-right: 0.25rem;
+}
+
+/* Links - subtle and refined */
+.info-content a {
+  color: var(--cb-30);
+  text-decoration: underline;
+  
+  text-underline-offset: 2px;
+}
+
+.info-content a:hover {
+  text-decoration-color: var(--cb-80);
+}
+
+/* Project Links Section - no border */
+.info-content .project-links {
+  margin-top: 0.5rem;
+}
+
+.info-content .project-links p {
+  margin-bottom: 0.35rem;
+}
+
+/* Metadata styling (Year, Medium, Client) */
+.info-content p:has(strong) {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .info-content {
+    font-size: 0.875rem;
+    width: 280px;
+  }
+  .info-content p {  line-height: 1.5; }
+  
+}
+
+/*-------------------------------------
+Buttons - Modern Shadow System
+--------------------------------------*/
+
+:root {
+  
+  /* Backgrounds */
+  --ui-control-opacity: 0.3;
+  --ui-bg-dark: rgba(35, 35, 35, 0.85);
+  
+  /* Unified shadow system - replaces archaic inset/outset borders */
+  --ui-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  
+  --ui-shadow-hover: 
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+  
+  /* Transitions */
+  --ui-transition: all 0.2s ease;
+}
+
+/* ===================================
+   PROJECT CLOSE BUTTON
+   =================================== */
+
+.project-close {
+  /* Positioning */
+  position: absolute;
+  top: var(--ix-button-y);
+  right: var(--ix-button-x);
+  z-index: 9999 !important;
+  
+  /* Layout */
+  width: var(--ix-button-sq);
+  height: var(--ix-button-sq);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Styling */
+  background: var(--ui-bg-dark);
+  color: white;
+  border-radius: 0; /* 90-degree corners as requested */
+  border: none;
+  
+  /* Modern depth effect */
+  box-shadow: var(--ui-shadow);
+  
+  /* Interaction */
+  cursor: pointer;
+  transition: var(--ui-transition);
+  
+  /* Typography */
+  font-size: 30px;
+  line-height: 1;
+}
+
+.project-close:hover {
+  box-shadow: var(--ui-shadow-hover);
+  background: rgba(35, 35, 35, 0.95);
+}
+
+/* X icon using pseudo-elements */
+.project-close::before,
+.project-close::after {
+  content: "";
+  position: absolute;
+  width: 1.5px;
+  height: 16px;
+  background: white;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.project-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* ===================================
+   INFO TAB BUTTON
+   =================================== */
+
+.info-tab {
+  /* Positioning */
+  position: absolute;
+  bottom: var(--ix-button-y);
+  right: var(--ix-button-x);
+  z-index: 5 !important;
+}
+
+.info-button {
+  /* Layout */
+  width: var(--ix-button-sq);
+  height: var(--ix-button-sq);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Styling */
+  background: var(--ui-bg-dark);
+  color: white;
+  border-radius: 6px; /* Rounded square as requested */
+  border: none;
+  
+  /* Modern depth effect */
+  box-shadow: var(--ui-shadow);
+  
+  /* Interaction */
+  cursor: pointer;
+  transition: var(--ui-transition);
+  
+  /* Typography */
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+  
+  /* Transform origin */
+  transform-origin: center;
+  position: relative;
+}
+
+.info-button:hover {
+  box-shadow: var(--ui-shadow-hover);
+  background: rgba(35, 35, 35, 0.95);
+}
+
+/* ===================================
+   CAROUSEL ARROW BUTTONS
+   =================================== */
+
+.carousel-arrow {
+  /* Positioning */
+  font-size: 0; /* Hides any accidental text */
+  position: fixed;
+  top: 50%;
+  
+  z-index: 900;
+-webkit-transform: translateY(-50%) translateZ(100px);
+    transform: translateY(-50%) translateZ(100px);
+  
+  
+  /* Layout */
+  width: var(--ix-button-sq);
+  height: var(--ix-button-sq);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Styling - Enhanced contrast for arrows */
+  background: rgba(25, 25, 25, 0.9); /* Darker for better contrast */
+  color: rgba(255, 255, 255, 0.95); /* Brighter arrows */
+  border-radius: 50%;
+  border: none;
+  
+  /* Modern depth effect */
+  box-shadow: var(--ui-shadow);
+  
+  /* Interaction */
+  cursor: pointer;
+  transition: var(--ui-transition);
+  
+  /* Typography */
+  font-size: 2.5rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.carousel-arrow:hover {
+  box-shadow: var(--ui-shadow-hover);
+  background: rgba(25, 25, 25, 1);
+  color: white;
+}
+
+/* 2. Create the unified line-weight arrow */
+.carousel-arrow::after {
+  content: '';
+  display: block;
+  width: 14px;  /* Size of the arrow head */
+  height: 14px; /* Size of the arrow head */
+  
+  /* ADJUST THIS TO MATCH YOUR 'X' BUTTON WEIGHT */
+  border-bottom: 1.5px solid currentColor; 
+  border-left: 1.5px solid currentColor;
+  
+  transition: transform 0.2s ease;
+}
+
+/* 3. Point them in the right direction */
+.carousel-arrow.left::after {
+  transform: rotate(45deg);
+  margin-left: 4px; /* Centers the 'point' visually in the circle */
+}
+
+.carousel-arrow.right::after {
+  transform: rotate(-135deg);
+  margin-right: 4px; /* Centers the 'point' visually in the circle */
+}
+
+/* Left arrow positioning */
+.carousel-arrow.left {
+  left: calc(var(--gutter-x) * 3 / 4);
+  transform-origin: left center;
+}
+
+/* Right arrow positioning */
+.carousel-arrow.right {
+  right: calc(var(--gutter-x) * 3 / 4);
+  transform-origin: right center;
+}
+
+/* ===================================
+   OPTIONAL: Enhanced arrow visibility
+   =================================== */
+
+/* Uncomment if you want arrows to have a subtle glow */
+/*
+.carousel-arrow {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+}
+*/
+
+@media (max-width: 576px) {
+  .carousel-arrow {
+    top: clamp(50%, calc(110vh - 8rem), 82.5%);
+   
+  }
+}
+
+/* Hide arrows if there is only one slide in the container */
+.carousel-container:has(.carousel-slide:only-child) .carousel-arrow {
+    display: none !important;
+}
+
+/*-------------------------------------
+  4. CAROUSEL & MEDIA RULES
+--------------------------------------*/
+.project-carousel, .carousel-container, .carousel-slide {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.project-carousel { min-height: 800px; display: flex; justify-content: center; align-items: center; }
+.carousel-slides { display: flex; transition: none; }
+
+.carousel-slide {
+  min-width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/*-------------------------------------*/
+/*  Minimum envelope for all media   */
+/*-------------------------------------*/
+.carousel-slide img:not(.media-fill):not(.full-width):not(.full-height):not(.video-facade img),
+.carousel-slide video:not(.media-fill):not(.full-width):not(.full-height) {
+  min-width: 60vw;
+  min-height: 60vh;
+  max-width: 93%;
+  max-height: 80vh;
+  object-fit: contain;
+  display: block;
+}
+
+/* Standard Media (Non-Fill) */
+.carousel-slide :is(img, video, canvas):not(.media-fill):not(.full-width):not(.full-height):not(.video-facade img) {
+  min-width: 60vw;
+  min-height: 60vh;
+  object-fit: contain;
+  display: block;
+  position: relative;
+}
+
+/* Fullscreen Media (.media-fill) */
+.media-fill-container {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  background: #000;
+}
+
+.media-fill {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%; height: 100%;
+  min-width: 100vw; min-height: 100vh;
+  object-fit: cover;
+  max-height: none !important;
+  max-width: none !important;
+}
+
+/*----Full-Height-Width-----*/
+/* Full Width: Forces 100% width, height scales naturally */
+.media-full-width,
+.full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain;
+  display: block;
+}
+
+/* Fill Height: Forces 100% viewport height, width scales naturally */
+.media-full-height,
+.full-height {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  width: auto !important;
+  max-width: none !important;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Ensure the slide container allows these to expand */
+.carousel-slide.layout-full-width {
+  display: block;
+  width: 100%;
+}
+@media (max-width: 576px) {
+  .carousel-slide :is(img, video) { max-height: 65vh; }
+}
+
+/*-------------------------------------
+  5. VIDEO & IFRAME LOGIC
+--------------------------------------*/
+.carousel-slide iframe {
+  border: none;
+  display: block;
+  width: 100%;
+  max-width: clamp(600px, min(90vw, calc(100vw - 200px), calc(80vh * 1.777)), 770px);
+  max-height: 80vh;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+}
+
+/* Mobile constraints */
+@media (max-width: 576px) {
+  .video-facade,
+  .carousel-slide iframe {
+    max-height: 55vh;
+  }
+}
+.video-facade {
+  position: relative;
+  width: 100%;
+  /* Smoothly scales from 90vw (small) to 770px (large) */
+  max-width: clamp(600px, min(90vw, calc(100vw - 200px), calc(80vh * 1.777)), 770px);
+  max-height: 80vh;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.video-facade img {
+  width: 100%;
+  height: 100%;
+  transform: scale(1);
+  object-fit: cover;
+  display: block;
+  z-index: 1;
+}
+
+
+/* Force the YouTube iframe to fill the exact same space */
+.active-facade-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  border: none;
+}
+
+
+.play-button {
+  position: absolute;
+  z-index: 10;
+  width: 68px; height: 48px;
+  background: rgba(33, 33, 33, 0.9);
+  border-radius: 12%;
+  transition: all 0.175s ease;
+  pointer-events: none;
+}
+
+.play-button::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 55%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: 10px 0 10px 18px;
+  border-color: transparent transparent transparent #fff;
+}
+
+
+.video-facade:hover .play-button { background: #ff0000; transform: scale(1.1); }
+.video-facade iframe { width: 100%; height: 100%; border: none; }
+
+@media (max-width: 576px) {
+  .video-facade { width: min(90vw, calc(55vh * 1.777)); max-height: 55vh; }
+}
+
+.standard-video { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+video::-webkit-media-controls { display:none !important; }
+
+/*-------------------------------------
+  6. 3D & CANVAS (THREE.JS)
+--------------------------------------*/
+.three-card {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  min-height: 400px;
+  display: block;
+  background: transparent;
+  position: relative;
+}
+
+.three-card canvas, .threejs-scene {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  object-fit: contain;
+}
+
+
+.carousel-slide canvas.threejs-scene { height: 80vh !important; }
+.media-fill-container canvas.threejs-scene { width: 100vw !important; height: 100vh !important; object-fit: cover; }
+
+/*-------------------------------------
+  7. NAVIGATION & HEADER
+--------------------------------------*/
+.navbar {
+  position: absolute;
+  top: 0; width: 100%;
+  z-index: 9000 !important;
+  background: transparent !important;
+  pointer-events: none;
+}
+
+#global-header {
+  position: absolute;
+  top: clamp(1.175rem, 0.25vw, 1.2rem);
+  left: 0;
+  right: 0;
+  padding-inline: var(--tri-nav-x);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  z-index: 3000;
+  padding-bottom: 0.15em;
+  color: #212529;
+  line-height: 1; /* restore a real line box */
+}
+#site-title a {
+  font-size: 2.1rem;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #212529;
+  letter-spacing: 0.065em;
+  font-weight: 300;
+  
+  /* 1. Set line-height to 1 to remove top/bottom 'buffer' */
+  line-height: 1; 
+  display: block;
+
+  /* 2. Optical Adjustment: Pull the text down slightly to hit the line 
+     Adjust the 2px value until it looks perfect for Public Sans */
+  margin-bottom: 0px; 
+}
+
+
+#nav-brand-home {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto;
+  z-index: 10000 !important;
+  will-change: transform;
+}
+
+#header-toggles {
+  display: inline-flex;
+  gap: 1.5rem; 
+  padding: 0; 
+  border: none;
+  align-items: baseline; 
+  pointer-events: auto;
+  
+  /* Ensure this container also doesn't add height */
+  line-height: 1;
+}
+#header-toggles a { 
+  text-decoration: none; 
+  color: inherit; 
+  font-size: clamp(0.875rem, 1.5vw, 0.95rem);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  
+  /* Optical Adjustment for smaller text to match the Title's rest-point */
+  margin-bottom: -2px; 
+}
+
+/* Global Header Breakpoint */
+@media (max-width: 576px) {
+  #global-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .4rem;
+    top: 1.02rem;
+  }
+
+  #site-title a {
+    letter-spacing: 0.05em;
+    font-size: 2rem;
+  }
+
+  #header-toggles {
+    gap: 0.8rem;
+    padding: 0.5rem 0;
+  }
+
+
+}
+
+/* Project Open State */
+body.project-open .navbar, 
+body.project-open .bg-body { background: none !important; border: none !important; box-shadow: none !important; }
+body.project-open .navbar-toggler,
+body.project-open .navbar-collapse { display: none !important; }
+body.project-open #global-header { position: fixed; pointer-events: none; }
+body.project-open #site-title, 
+body.project-open #header-toggles { pointer-events: auto; }
+body.project-open #header-toggles { display: none; }
+
+/*-------------------------------------
+  8. INTERACTION & TOUCH LOCKS
+--------------------------------------*/
+.threejs-scene, .video-facade, .three-card canvas { touch-action: none !important; }
+.carousel-slide[data-media-type="glb"],
+.carousel-slide[data-media-type="youtube"] { touch-action: none; }
+.carousel-slide[data-media-type="image"] { touch-action: pan-y; }
+
+@media (pointer: coarse) {
+  .carousel-slide[data-media-type="image"],
+  .carousel-slide[data-media-type="video"] { touch-action: manipulation; }
+}
+
+.external-arrow { opacity: 0.5; margin-left: 0.15em; }
+
+.card-main-media, .standard-video, .media-fill {
+  outline: none; border: none; background-color: transparent;
+}
+
+
+
+
+
+:root {
+   /* Info, Close Positioning */
+  --ix-button-x: 1.45rem;
+  --ix-button-y: 1.45rem;
+  --ix-button-sq: 37.5px;
+
+  --tri-int: 48px;
+  --tri-ext: 23px;
+  
+  --tri-nav-y: 1.175rem;
+  --tri-nav-x: 22.5px;
+
+
+  @media (max-width: 576px) {
+
+    --tri-int: 44px;
+    --tri-ext: 18px;
+    
+    --tri-nav-y: 1.2rem;
+    --tri-nav-x: 1.15rem;
+
+    --ix-button-x: 1.15rem;
+    --ix-button-y: 1.15rem;
+
+
+  }
+}
+
+
+/* This targets ONLY the info overlay, leaving project overlays dark */
+#info.project-page {
+    display: none; /* Default */
+    flex-direction: column;
+    justify-content: flex-start; /* Start from top */
+    align-items: center;
+    overflow-y: auto; /* Allow scrolling */
+    background: #fafafa; /* Ensure background is white */
+}
+
+#info.is-active {
+    display: flex; /* Show when active */
+}
+/* Fix the Close Button for the light background */
+ .project-close {
+    filter: invert(1); /* Flips the 'X' from white to black */
+}
+
+/* Ensure it stays white/default on standard dark project pages */
+.project-page:not(#info) .project-close {
+    filter: none;
+}
+
+/* 1. THE DEFAULT STATE (Dark projects) */
+.project-close, 
+.carousel-arrow {
+    filter: none; /* Keep them white */
+    transition: none !important;
+}
+
+/* 2. THE INVERTED STATES (Light projects OR the Info page) */
+/* We group #info and .is-inverted because they both need black UI */
+#info.is-active .project-close,
+.project-page.is-inverted .project-close,
+.project-page.is-inverted .carousel-arrow {
+    filter: invert(1) !important;
+    transition: none !important;
+    
+}
+
+.project-page.is-inverted {
+    background: #fafafa;}
+
+/* Inverted logo color for light backgrounds */
+body.project-open:has(.project-page.is-inverted.is-active) #site-title a,
+body.project-open:has(.project-page.is-inverted.is-active) #header-toggles,
+body.project-open:has(#info.is-active) #site-title a,
+body.project-open:has(#info.is-active) #header-toggles {
+    color: #e3e3e3; /* Subtle on light background */
+}
+
+
+
+/* 3. THE EXCEPTION (Specific dark slides inside a light project) */
+/* This MUST come last to override the rules above */
+.project-page:has(.carousel-slide.is-active.ui-reset) .project-close,
+.project-page:has(.carousel-slide.is-active.ui-reset) .carousel-arrow {
+    filter: invert(0) !important;
+}
+
+/* Target the Info content container if needed */
+#info .info-shell {
+    background: transparent;
+}
+
+/* If your labels were white, make them dark grey for contrast */
+#info .info-label {
+    color: var(--muted);
+    border-bottom: 1px solid #eee;
+}
+
+.info-grid {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.info-quote {
+/* Fluid range: 1.7rem on mobile to 2.25rem on large desktop */
+  font-size: clamp(1.3rem, 3vw, 2.25rem);
+  
+  font-weight: 700;
+  max-width: clamp(450px, 50vw, 700px);
+  margin-left: auto;
+  margin-right: auto;
+
+  /* Line-height 1.4 is the sweet spot between "tight" and "brick" */
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+  
+  /* Balancing your vertical ranges */
+  padding: 
+    clamp(5rem, 8vh, 11rem) 
+    clamp(1.45rem, 5vw, 4.5rem); /* Bottom range starts at your 1.45rem system gutter */
+
+ 
+  
+  position: relative;
+}
+
+  /* --- RESPONSIVE --- */
+  /* --- RESPONSIVE --- */
+  @media (max-width: 650px) {
+
+    .info-quote {padding:
+     clamp(3rem, 6vh, 7rem) 
+     clamp(1.5rem, 4vw, 3rem);
+     letter-spacing: -0.0125em;
+     line-height: 1.275;
+  }
+
+
+    .info-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    
+   
+ 
+    
+    .info-contact { 
+      flex-direction: column; 
+      gap: 10px; 
+      text-align: center;
+      padding: 20px;
+    }
+
+    .skills-container {
+      justify-content: center;
+    }
+
+
+    .info-image-container {
+      margin-top: 60px;
+    }
+  }
+
+
+/* --- Quote Hover Anim (Keep) --- */
+  .info-quote a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 2px solid var(--accent);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .info-quote a:hover {
+    background: var(--accent);
+    color: white;
+    padding: 2px 4px;
+  }
+
+:root {
+  --bg: #fafafa;
+  --fg: #0f0f11;
+  --muted: #8a8a8a;
+  --soft: #efefef;
+  --accent: #5b6ef1;
+
+  --cb: #131316;
+
+  --cb-80: #131316cc; /* 80% opacity */
+  --cb-30: #1313164d; /* 30% opacity */
+
+  /* Color Pops from Projects */
+  --pop-cashapp: #00D856;
+  --pop-icespice: #FF6B9D;
+  --pop-sundays: #FFD600;
+  --pop-danger: #FF3D00;
+
+  /* Fluid Sizing */
+  --step--1: clamp(0.7rem, 0.65rem + 0.2vw, 0.85rem);
+  --step-0: clamp(0.9rem, 0.85rem + 0.3vw, 1.1rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.8vw, 1.8rem);
+
+  --radius: 20px;
+}
+
+
+  /* --- TEXT BLOCKS (The Spec Sheet) --- */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 40px;
+    margin-bottom: 80px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: focusReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+  }
+
+  .info-label {
+    font-family: var(--font-heading);
+    font-size: var(--step--1);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    position: relative;
+  }
+
+  /* Subtle floating indicator */
+  .info-label::before {
+    content: '→';
+    position: absolute;
+    left: -1.5em;
+    color: var(--accent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .info-grid:hover .info-label::before {
+    opacity: 1;
+  }
+
+  .info-block {
+    font-size: var(--step-0);
+    line-height: 1.6;
+  }
+
+  .info-block strong {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .info-block p { 
+    margin: 0 0 1.5rem;
+  }
+
+  .info-block a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--muted);
+    text-underline-offset: 3px;
+    transition: all 0.2s ease;
+  }
+
+  .info-block a:hover {
+    text-decoration-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* --- DIVIDER --- */
+  .info-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, var(--soft) 10%, var(--soft) 90%, transparent 100%);
+    margin: 60px 0;
+    width: 100%;
+  }
+
+  /* --- CONTACT (Glass Card) --- */
+  .info-contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 28px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(10px) saturate(120%);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: var(--radius);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+  
+
+  .info-contact a {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: var(--step-0);
+    letter-spacing: 0.02em;
+    transition: color 0.2s ease;
+  }
+
+
+  /* --- SKILLS PILLS --- */
+
+  /* --- IMAGE (Morphing Mask) --- */
+  .info-image-container {
+    margin-top: 100px;
+    position: relative;
+    opacity: 0;
+    animation: focusReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.6s forwards;
+  }
+
+  .info-image-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transition: border-radius 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background: var(--soft);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  }
+
+  .info-image-wrap:hover {
+    border-radius: 40% 60% 70% 30% / 50% 60% 30% 60%;
+    box-shadow: 0 16px 60px rgba(0, 0, 0, 0.12);
+  }
+
+  .info-image-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 0.6s ease, transform 0.6s ease;
+  }
+  
+  .info-image-wrap:hover img {
+    filter: grayscale(0%);
+    transform: scale(1.05);
+  }
+
+  .info-caption {
+    font-family: var(--font-heading);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-top: 20px;
+    text-align: right;
+    font-weight: 500;
+  }
+.info-featured-image {
+    width: 100%;
+    margin-bottom: 2rem; /* Space between image and bio start */
+    overflow: hidden;
+}
+
+.info-featured-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* --- THE MASTER CONTROLLER --- */
+.info-content-wrapper {
+  max-width: 800px; /* This now controls the width of everything */
+  margin: 0 auto;    /* Centers the entire block */
+  padding-top:    0;
+  padding-bottom: 3.5rem;
+  padding-left:   2rem;
+  padding-right:  2rem;
+}
+
+:root {
+  --email-row-x: 1.4rem;
+  --email-row-y: 1.48rem;
+}
+
+@media (max-width: 576px) {
+  :root {
+    --email-row-x: 1.5rem;
+    --email-row-y: 1.23rem;
+  }
+  
+}
+
+/* --- EMAIL ROW --- */
+.email-row {
+  display: inline-flex;       /* keeps icon + text in one line */
+  align-items: center;        /* vertically center icon + text */
+  gap: clamp(0.8rem, 1.5vw, 1.75rem);             /* spacing between icon and link */
+
+  margin-left: var(--email-row-x);  /* horizontal offset from container */
+  margin-right: auto;
+  width: fit-content;
+
+  /* vertical spacing from surrounding content */
+  margin-top: var(--email-row-y);   /* replaces padding-top for better control */
+}
+
+/* --- ICON --- */
+.email-icon {
+  display: flex;
+  align-items: center;
+  margin-left: -.05rem;
+}
+
+.email-icon svg {
+  display: block; 
+  height: 1.5em;  /* scales with text size */
+  width: 1.5em;
+}
+
+/* --- LINK --- */
+.email-link {
+    
+    text-transform: uppercase;
+    font-weight: 300;
+    font-size: clamp(0.85rem, 0.76rem + 0.45vw, 0.95rem);
+    letter-spacing: 0.73px;
+    color: var(--muted) !important; /* Forces gray */
+    text-decoration: none !important; /* Removes the blue underline */
+    position: relative;
+    top: 1.3px;
+}
+
+
+
+/* --- SHELL ADJUSTMENTS --- */
+.info-shell {
+  max-width: 100%;  /* Takes full width of the wrapper */
+  margin: 0;        /* Removes auto margin so it aligns left */
+  padding: 0;       /* Removes internal padding so it aligns with Quote/Email */
+  display: grid;
+  grid-template-columns: 1fr 1.8fr;
+  gap: 60px;
+}
+
+/* --- MAIN CONTAINER --- */
+.info-shell { animation: focusReveal 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+
+/* --- MOBILE TWEAKS --- */
+@media (max-width: 800px) {
+  .info-content-wrapper {
+    padding-left: var(--email-row-x);
+    padding-right: var(--email-row-x);
+  }
+
+}
+
+
+/* --- INFO OVERLAY SPECIFIC STYLES --- */
+#info.project-page {
+    background: #fafafa;
+    color: var(--fg);
+    display: none; /* Controlled by JS */
+    overflow-y: auto;
+    align-items: flex-start;
+    padding: 0;
+}
+
+#info.is-active {
+    display: block; /* Override flex for scrolling */
+}
+
+
+
+/* Left Sidebar */
+.info-left {
+    position: sticky;
+    top: 0px;
+    height: fit-content;
+    color: var(--fg);
+}
+
+.name-sub {  
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 1rem; padding: 0px 0; border-bottom: 0px solid transparent;
+}
+
+.availability-status {
+  font-size: 0.95rem;    /* adjust as needed */
+  
+  padding-top: .35rem;
+  padding-bottom: .35rem;
+
+  color: var(--fg);
+  display:block;
+}
+
+.status-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin: 0px 0 0px 0; 
+    padding: 8px 14px;
+    background: rgba(0, 215, 86, 0.1); border-radius: 100px;
+    font-size: 0.7rem; font-weight: 400;
+    color: #00D856; text-transform: uppercase;
+}
+.status-dot { width: 6px; height: 6px; background: #00D856; border-radius: 50%; }
+
+.skills-block {
+  padding: .85rem 0 2.5rem 0;
+}
+
+.skill-item {    
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding-bottom: .5rem;
+}
+
+.contact-block {
+    margin-top: 0px; padding: 20px;
+    background: white; border: 1px solid #e6e6e6; border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.status-container {
+  display: inline-block;          /* horizontal layout */
+  align-items: center;    /* vertically center badge + text */
+  gap: 1rem;              /* space between badge and availability text */
+  flex-wrap: wrap;        /* allows wrapping on small screens */
+}
+
+.contact-label {
+  margin-top: 15px; 
+    font-size: 0.65rem;
+    font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
+}
+.contact-block a {
+    display: block; 
+    font-weight: 600; color: var(--fg); text-decoration: none; margin-bottom: 10px;
+}
+
+/* Right Content Area */
+
+.content-section { margin-bottom: 2em; }
+.content-section p { margin-bottom: 1.2rem; font-size: 1rem; }
+
+.experience-list { list-style: none; counter-reset: i; }
+.experience-list li {
+    counter-increment: i; position: relative;
+    padding-left: 0px; margin-bottom: 1.5rem; font-size:  1rem;
+}
+.experience-list li::before {
+    content: counter(i); position: absolute; left: -32px;
+   font-weight: 700; color: var(--muted); font-size: 0.7rem;
+}
+
+
+/*     Full Width     */
+
+.section-label {
+    font-size: 0.65rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
+}
+.section-label::before { content: ''; width: 20px; height: 2px; background: var(--accent); }
+
+.image-block img { border-radius: 12px; filter: grayscale(1); transition: 0.4s; 
+    display: block;          /* makes margin auto work */
+  width: 90%;              /* your desired width */
+  margin-left: auto;       /* center horizontally */
+  margin-right: auto;
+  padding-bottom: var(--gutter-bottom);
+  max-width: 735px;
+}
+.image-block:hover img { filter: grayscale(0); }
+
+
+/* Mobile */
+@media (max-width: 800px) {
+    .info-shell { grid-template-columns: 1fr; gap: 40px; }
+    .info-left { position: relative; top: 0; }
+}
+
+/* --- 1. THE ANIMATION (Crucial: Must be at the root) --- */
+@keyframes scroll-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* --- 2. MASONRY ITEM OVERRIDE --- */
+/* This ensures your info chips don't get 'sliced' by the masonry columns */
+.info-chip-item {
+  break-inside: avoid;
+  margin-bottom: var(--masonry-gap-y);
+  display: block;
+  width: 100%;
+}
+
+/* --- 3. THE CHIP (The Box) --- */
+.info-chip-item a.grid-item {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center; /* Centers the marquee/content */
+  padding: 1.5rem;
+
+  width: 100%;
+ 
+  overflow: hidden; /* CRITICAL: Hides the text as it scrolls out of the box */
+  transition: 0.2s ease;
+  position: relative;
+}
+
+[data-chip-type="info"] .grid-item,
+[data-chip-type="counter"] .grid-item,
+[data-chip-type="accent"] .grid-item {
+  min-height: 5.5rem;
+}
+
+/* --- 4. THE MARQUEE LOGIC (The Movement) --- */
+.marquee-card {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap; /* Prevents text from wrapping to a new line */
+}
+
+.marquee {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  /* Adjust '15s' to make it faster or slower */
+  animation: scroll-left 15s linear infinite; 
+}
+
+.marquee span {
+  font-family: var(--site-font);
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 0 10px;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+/* --- 5. COLOR THEMES --- */
+.black-theme { background: var(--cb); color: var(--soft); }
+.grey-theme  { background: var(--soft); color: var(--fg) ; }
+.blue-theme  { background: var(--soft); color: var(--fg) ; }
+.white-theme  { background: var(--accent); color: var(--soft); }
+.inverse-theme { background: var(--soft); color: var(--cb); }
+
+.info-chip-item a.black-theme:hover { background: var(--soft); color: var(--cb); }
+.info-chip-item a.grey-theme:hover  { background: var(--soft); color: var(--fg); }
+.info-chip-item a.blue-theme:hover  { background: var(--accent); color: var(--soft); }
+.info-chip-item a.white-theme:hover { background: var(--soft); color: var(--fg); }
+.info-chip-item a.inverse-theme:hover { background: var(--cb); color: var(--soft);}
+
+/* --- 6. HOVER EFFECT --- */
+
+/* Scale the content inside instead */
+.info-chip-item a.grid-item:hover .marquee span {
+  transform: scale(1.05);
+}
+
+.info-chip-item a.grid-item:hover .accent-card,
+.info-chip-item a.grid-item:hover .counter-content,
+.info-chip-item a.grid-item:hover .info-content {
+  transform: scale(1.05);
+}
+
+/* Add smooth transition to content */
+.marquee span,
+.accent-card,
+.counter-content,
+.info-content {
+  transition: transform 0.2s ease;
+}
+
+.info-chip-item a.grid-item:hover {
+  transform: scale(var(--card-hover-scale));
+}
+/* Randomize speed for every other marquee */
+.info-chip-item:nth-child(odd) .marquee {
+  animation-duration: 12s;
+  animation-direction: reverse; /* Some move right, some move left */
+}
+
+.info-chip-item:nth-child(even) .marquee {
+  animation-duration: 18s;
+  animation-delay: -2s; /* Starts 'mid-way' so they aren't synced */
+}
+
+/* Give them slightly different font sizes so they don't look identical */
+.info-chip-item:nth-child(3n) .marquee span {
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+/* Add this to your CSS */
+.info-chip-item {
+  break-inside: avoid;
+  margin-bottom: var(--masonry-gap-y);
+  display: block;
+  width: 100%;
+  /* CRITICAL: Ensure chips don't break column flow */
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+
+/* Ensure chips have proper aspect ratio in masonry */
+
+
+@media (max-width: 576px) {
+  [data-chip-type="marquee"] .grid-item {
+    aspect-ratio: 10 / 1;
+  }
+}
+
+[data-chip-type="marquee"] .grid-item {
+  aspect-ratio: 4 / 2.5; 
+  
+}
+
+
+[data-chip-type="counter"] .grid-item {
+  aspect-ratio: 2/ 1.7;
+   border-radius: 4px;
+}
+
+
+[data-chip-type="info"] .grid-item {
+  aspect-ratio: 1 / 1.15;
+  min-height: 5.5rem;
+   border-radius: 4px;
+}
+
+/* 4. ACCENT: logic */
+[data-chip-type="accent"] .grid-item {
+  aspect-ratio: 1 / 1;
+   border-radius: 4px;
+}
+
+
+
+/* Container alignment */
+.info-chip-item[data-chip-type="accent"] .grid-item {
+  display: flex;
+  justify-content: flex-start; 
+  align-items: flex-start;     
+  padding: 1.5rem;             
+  min-height: 220px; /* Increased to emphasize the 'accidental' empty space */
+  text-decoration: none;
+}
+
+.accent-card {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 400; /* This gives you that "punchy" look */
+  line-height: 1.5;
+  letter-spacing: -0.01em; /* Tightens the "terminal" feel */
+  margin: 0;
+  text-align: left;
+  
+  /* Anti-aliasing boost for thin mono fonts on Mac */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+/* The Blinking Cursor */
+.accent-card::after {
+  content: "|";
+  margin-left: -2px;
+  font-weight: bold;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* --- INFO OVERLAY SPECIFIC OVERRIDES --- */
+
+/* 1. Kill the global header when Info is open */
+body:has(#info.is-active) #global-header {
+    display: none !important;
+}
+
+/* 2. Fix the Close Button so it stays put during scroll */
+#info .project-close {
+    position: fixed; /* Locked to viewport */
+    
+    
+    z-index: 9999;
+    
+    /* You already have filter: invert(1), which is perfect for #fafafa */
+}
+
+/* 3. Ensure the Close Button doesn't have transform issues */
+#info.is-active .project-close {
+    /* If your .project-page uses flex/center, fixed position 
+       usually handles itself, but this ensures no weird offsets */
+    transform: none; 
+}
+
+
+
+.info-section-pen {
+  padding-top: .5rem;
+}
+
+.info-section-end {
+  padding-top: .25rem;
+}
+
+
+
+/* DIAGNOSTIC: Add bright outlines to see layers */
+
+
+.project-close {
+
+  z-index: 9999 !important;
+  -webkit-transform: translateZ(0); /* Force GPU layer */
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+

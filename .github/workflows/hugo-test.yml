@@ -1,0 +1,34 @@
+name: Hugo Minify Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # Fetch themes if they are submodules
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: 'latest'
+          extended: true         # Use extended version for Sass/SCSS support
+
+      - name: Run Minify Test Build
+        run: |
+          hugo --minify --gc --destination test_output
+          
+      - name: Audit Output (Optional)
+        run: |
+          if [ ! -d "test_output" ]; then
+            echo "Build failed to generate output directory"
+            exit 1
+          fi
+          echo "Minified build successful."

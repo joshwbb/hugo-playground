@@ -1,0 +1,17 @@
+{{ with .Params.info_content }}
+
+<div id="{{ .id }}" class="info">
+  <div class="info-inner">
+    <img src="{{ .image }}" alt="" loading="lazy" />
+
+    <p>{{ .info_content }}</p>
+
+
+
+    <p class="availability">
+      <strong>{{ .availability }}</strong><br />
+      {{ .availability_status }}
+    </p>
+  </div>
+</div>
+{{ end }}

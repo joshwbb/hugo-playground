@@ -1,0 +1,348 @@
+{{ define "main" }}
+
+<section class="hero"></section>
+
+<section class="gallery-section">
+  <div class="masonry">
+    {{ range $index, $card := .Params.cards }}
+    {{ $base := .media_base | default "/media/" }}
+    {{ $firstMedia := index .media 0 }}
+
+    {{/* Build shuffle pool: _thumb files + ALL glb files */}}
+    {{ $shufflePool := slice }}
+    {{ range .media }}
+    {{ $isThumb := in (.src | default "") "_thumb" }}
+    {{ $isGLB := or (eq .type "glb") (eq .type "3js") }}
+    {{ if and (or $isThumb $isGLB) (not .shuffleExclude) }}
+    {{ if $isGLB }}
+    {{ $shufflePool = $shufflePool | append (printf "%s%s" $base .model) }}
+    {{ else }}
+    {{ $shufflePool = $shufflePool | append (printf "%s%s" $base .src) }}
+    {{ end }}
+    {{ end }}
+    {{ end }}
+
+    <div class="masonry-item">
+      <div class="image-card" data-pool='{{ delimit $shufflePool "|" }}'>
+
+        {{/* Display first media item as the card */}}
+        {{ if or (eq $firstMedia.type "glb") (eq $firstMedia.type "3js") }}
+        <div class="three-card" data-model="{{ printf " %s%s" $base $firstMedia.model }}"
+          aria-label="{{ $firstMedia.alt | default .title }}"></div>
+
+        {{ else if eq $firstMedia.type "video" }}
+        {{/* Generate the poster path: replaces .webm with _thumb.webp */}}
+        {{ $videoThumb := replace $firstMedia.src ".webm" "_thumb.webp" }}
+
+        <video class="card-main-media" src="{{ printf " %s%s" $base $firstMedia.src }}" poster="{{ printf " %s%s" $base
+          $videoThumb }}" autoplay loop muted playsinline {{ if ge $index 4 }} loading="lazy" {{ end }}>
+        </video>
+
+        {{ else }}
+        {{/* RESPONSIVE MASONRY IMAGE */}}
+        {{ $thumbSrc := printf "%s%s" $base $firstMedia.src }}
+        {{ $mediumSrc := replace $thumbSrc "_thumb.webp" "_medium.webp" }}
+        {{ $fullSrc := replace $thumbSrc "_thumb.webp" ".webp" }}
+        <img class="card-main-media" src="{{ $thumbSrc }}"
+          srcset="{{ $thumbSrc }} 400w, {{ $mediumSrc }} 800w, {{ $fullSrc }} 1920w"
+          sizes="(max-width: 576px) 100vw, (max-width: 850px) 50vw, (max-width: 1140px) 33vw, (max-width: 1600px) 25vw, (max-width: 2175px) 20vw, 16.66vw"
+          alt="{{ $firstMedia.alt | default .title }}" {{ if lt $index 4 }} loading="eager" fetchpriority="high" {{ else
+          }} loading="lazy" {{ end }}>
+        {{ end }}
+
+        <a href="#{{ .id }}" class="card-overlay-link"></a>
+        <div class="image-caption">
+          <h5>{{ .title }}</h5>
+        </div>
+      </div>
+    </div>
+    {{ end }}
+  </div>
+</section>
+
+{{/* CHIP POOL: Hidden initially, JS will inject them */}}
+<div class="chip-pool" style="display: none;">
+  {{ range $index, $chip := .Params.info_grid_chips }}
+  <div class="masonry-item info-chip-item" data-chip-type="{{ $chip.type }}">
+    <a href="#info" class="grid-item {{ $chip.color }}-theme">
+      {{ if eq $chip.type "marquee" }}
+      <div class="marquee-card">
+        <div class="marquee">
+          {{ range $chip.content }}<span>{{ . }}</span><span>×</span>{{ end }}
+          {{ range $chip.content }}<span>{{ . }}</span><span>×</span>{{ end }}
+        </div>
+      </div>
+      {{ else if eq $chip.type "counter" }}
+      <div class="counter-card">
+        <div class="counter-label">{{ $chip.label }}</div>
+        <div class="counter-value">{{ $chip.value }}</div>
+      </div>
+      {{ else if eq $chip.type "info" }}
+      <div class="info-card">
+        <h6>{{ $chip.title }}</h6>
+        <p>{{ $chip.text }}</p>
+      </div>
+      {{ else if eq $chip.type "accent" }}
+      <div class="accent-card">
+        {{ $chip.content | markdownify | safeHTML }}
+      </div>
+      {{ end }}
+    </a>
+  </div>
+  {{ end }}
+</div>
+</section>
+
+{{/* PROJECT OVERLAYS */}}
+{{ range .Params.cards }}
+{{ $cardID := .id }}
+{{ $cardTitle := .title }}
+{{ $base := .media_base | default "/media/" }}
+
+<div class="project-page {{ if .invert_ui }}is-inverted{{ end }}" id="{{ $cardID }}">
+  <button class="project-close" aria-label="Close project"></button>
+
+  <section class="project-carousel">
+    <div class="carousel-container">
+      <div class="carousel-slides">
+
+        {{/* Carousel: EXCLUDE _thumb files, INCLUDE glb/youtube/everything else */}}
+        {{ range .media }}
+        {{ $isThumb := in (.src | default "") "_thumb" }}
+        {{ if not $isThumb }}
+        <div class="carousel-slide {{ if eq .invert_ui false }}ui-reset{{ end }}{{ if eq .index 0 }} is-active{{ end }}">
+          {{ $isFull := eq .layout "fullscreen" }}
+          {{ $val := .src | default .model | default .id }}
+
+          {{ $fullSrc := "" }}
+          {{ if eq .type "youtube" }}
+          {{ $fullSrc = printf "https://www.youtube.com/embed/%s" $val }}
+          {{ else if eq .type "vimeo" }}
+          {{ $fullSrc = printf "https://player.vimeo.com/video/%s" $val }}
+          {{ else if eq .type "iframe" }}
+          {{ $fullSrc = $val }}
+          {{ else }}
+          {{ $fullSrc = printf "%s%s" $base $val }}
+          {{ end }}
+
+          {{ if $isFull }}
+          <div class="media-fill-container">
+            {{ if eq .type "video" }}
+            <video src="{{ $fullSrc }}" class="media-fill" autoplay loop muted playsinline
+              aria-label="{{ .alt | default $cardTitle }}"></video>
+            {{ else if or (eq .type "glb") (eq .type "3js") }}
+            <canvas class="threejs-scene media-fill" data-src="{{ $fullSrc }}"
+              aria-label="{{ .alt | default $cardTitle }}"></canvas>
+            {{ else }}
+            {{/* RESPONSIVE FULLSCREEN CAROUSEL IMAGE */}}
+            {{ $mediumSrc := replace $fullSrc ".webp" "_medium.webp" }}
+            <img src="{{ $fullSrc }}" srcset="{{ $mediumSrc }} 800w, {{ $fullSrc }} 1920w" sizes="100vw"
+              class="media-fill" alt="{{ .alt | default $cardTitle }}" loading="lazy">
+            {{ end }}
+          </div>
+          {{ else }}
+          {{/* STANDARD MODE */}}
+           {{ if eq .type "youtube" }}
+    <div class="video-facade" data-videoid="{{ .id }}">
+      <img src="https://i.ytimg.com/vi/{{ .id }}/hqdefault.jpg" alt="Video thumbnail" loading="lazy">
+      <div class="play-button"></div>
+    </div>
+          {{ else if or (eq .type "vimeo") (eq .type "iframe") }}
+          <iframe src="{{ $fullSrc }}" frameborder="0" allow="autoplay; fullscreen" allowfullscreen
+            title="{{ .alt | default $cardTitle }}"></iframe>
+          {{ else if eq .type "video" }}
+          {{ $fullSrc := printf "%s%s" $base $val }}
+          {{/* Generate the poster path for carousel video */}}
+          {{ $videoThumb := replace $val ".webm" "_thumb.webp" }}
+
+          {{ if $isFull }}
+          <div class="media-fill-container">
+            <video src="{{ $fullSrc }}" poster="{{ printf " %s%s" $base $videoThumb }}" class="media-fill" autoplay loop
+              muted playsinline aria-label="{{ .alt | default $cardTitle }}">
+            </video>
+          </div>
+          {{ else }}
+          <video src="{{ $fullSrc }}" poster="{{ printf " %s%s" $base $videoThumb }}" class="standard-video" autoplay
+            loop muted playsinline aria-label="{{ .alt | default $cardTitle }}">
+          </video>
+          {{ end }}
+          {{ else if or (eq .type "3js") (eq .type "glb") }}
+          <canvas class="threejs-scene" data-src="{{ $fullSrc }}" aria-label="{{ .alt | default $cardTitle }}"></canvas>
+            {{/* 5. IMAGES (ONLY) WITH FILL MODES */}}
+  {{ else }}
+    {{ $mediumSrc := replace $fullSrc ".webp" "_medium.webp" }}
+    
+    {{ if eq .layout "full-width" }}
+      <img src="{{ $fullSrc }}" class="full-width" srcset="{{ $mediumSrc }} 800w, {{ $fullSrc }} 1920w" 
+        sizes="100vw" alt="{{ .alt | default $cardTitle }}" loading="lazy">
+    
+    {{ else if eq .layout "full-height" }}
+      <img src="{{ $fullSrc }}" class="full-height" srcset="{{ $mediumSrc }} 800w, {{ $fullSrc }} 1920w" 
+        sizes="100vw" alt="{{ .alt | default $cardTitle }}" loading="lazy">
+    
+    {{ else }}
+      {{/* ORIGINAL STANDARD FALLBACK */}}
+      <img src="{{ $fullSrc }}" srcset="{{ $mediumSrc }} 800w, {{ $fullSrc }} 1920w"
+        sizes="(max-width: 576px) 90vw, 80vw" alt="{{ .alt | default $cardTitle }}" loading="lazy">
+    {{ end }}
+  {{ end }}
+{{ end }}
+        </div>
+        {{ end }}
+        {{ end }}
+
+      </div>
+
+      {{ if gt (len .media) 1 }}
+      <button class="carousel-arrow left" aria-label="Previous"></button>
+      <button class="carousel-arrow right" aria-label="Next"></button>
+      {{ end }}
+    </div>
+  </section>
+
+  {{/* INFO TAB */}}
+  {{ if .info }}
+  <div class="info-tab">
+    <button class="info-button" aria-expanded="false" aria-controls="info-{{ $cardID }}">i</button>
+    <div class="info-content" id="info-{{ $cardID }}">
+      {{ with .title }}<p><strong>Title:</strong> {{ . }}</p>{{ end }}
+      {{ with .info.year }}<p><strong>Year:</strong> {{ . }}</p>{{ end }}
+      {{ with .info.medium }}<p><strong>Medium:</strong> {{ . }}</p>{{ end }}
+      {{ with .info.client }}
+      <p>
+        {{ if eq . "Personal Project" }}
+        <strong>Type:</strong> {{ . }}
+        {{ else }}
+        <strong>Client:</strong> {{ . }}
+        {{ end }}
+      </p>
+      {{ end }}
+      {{ with .info.overview }}<p class="info-section-pen">{{ . | markdownify }}</p>{{ end }}
+
+      {{ $hasValidLink := false }}
+      {{ with .info.links }}
+      {{ range . }}
+      {{ if and (ne (.text | default "") "") (ne (.url | default "") "") }}
+      {{ $hasValidLink = true }}
+      {{ end }}
+      {{ end }}
+      {{ end }}
+
+      {{ if $hasValidLink }}
+      <div class="project-links">
+        {{ range .info.links }}
+        {{ $text := .text | default "" }}
+        {{ $url := .url | default "" }}
+        {{ if and (ne $text "") (ne $url "") }}
+        <p class="info-section-end">
+          {{ with .label }}<strong>{{ . }}</strong> {{ end }}
+          <a href="{{ $url }}" target="_blank" rel="noopener">{{ $text }}</a>
+        </p>
+        {{ end }}
+        {{ end }}
+      </div>
+      {{ end }}
+    </div>
+  </div>
+  {{ end }}
+</div>
+{{ end }}
+{{/* THE GLOBAL INFO OVERLAY */}}
+
+{{ with .Params.info_content }}
+<div class="project-page info-shell-overlay" id="info">
+<button class="project-close" aria-label="Close info"></button>
+
+<div class="email-row">
+  <span class="email-icon">
+    <a href="mailto:JOSHWBURKE@GMAIL.COM"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25">
+      <g>
+        <rect x="2.52" y="4.71" width="19.96" height="15.58" fill="none" stroke="#8a8a8a" stroke-miterlimit="10" stroke-width="1.3"/>
+        <polyline points="2.52 4.71 12.5 14.06 22.48 4.71" fill="none" stroke="#8a8a8a" stroke-miterlimit="10" stroke-width="1.3"/>
+        <line x1="2.52" y1="20.29" x2="10.49" y2="12.75" fill="none" stroke="#8a8a8a" stroke-miterlimit="10" stroke-width="1.3"/>
+        <line x1="14.52" y1="12.75" x2="22.48" y2="20.29" fill="none" stroke="#8a8a8a" stroke-miterlimit="10" stroke-width="1.3"/>
+      </g>
+      <rect width="25" height="25" fill="none"/>
+    </svg></a>
+    
+  </span>
+  <a href="mailto:JOSHWBURKE@GMAIL.COM" class="email-link">joshwburke@gmail.com</a>
+</div>
+
+  <div class="info-content-wrapper">
+
+<div class="info-quote">
+    Our dear earth pushes me up as I fall, touching the ground
+    <a href="https://www.youtube.com/watch?v=DXKojYz25Gw" target="_blank" rel="noopener">lightly</a>
+    with intention
+  </div>
+
+  <main class="info-shell">
+
+    <aside class="info-left">
+      <div class="name-block">
+        <div class="name-sub"><span>{{ .descriptor }}</span></div>
+
+      </div>
+
+      <div class="status-container">
+         <span class="availability-status">{{ .availability_status }}</span>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span>{{ .availability }}</span>
+        </div>
+       
+      </div>
+
+
+      <div class="skills-block">
+        <p><div class="contact-label"></div></p>
+        {{ range .capabilities }}
+        <div class="skill-item">{{ . }}</div>
+        {{ end }}
+      </div>
+
+      <div class="contact-block">
+
+        <div class="contact-label">Network</div>
+        <a href="https://www.linkedin.com/in/joshwb/" target="_blank">LinkedIn →</a>
+        <a href="https://instagram.com/magic.mountain" target="_blank">Instagram →</a>
+      </div>
+
+
+    </aside>
+
+    <article class="info-right">
+      <section class="content-section">
+        {{ .identity_p1 | markdownify }}
+        <p>{{ .identity_p2 }}</p>
+        <p>{{ .identity_p3 | markdownify }}</p>
+      </section>
+
+      <section class="content-section">
+
+        <ul class="experience-list">
+          {{ range .experience }}
+          <li>{{ . | markdownify }}</li>
+          {{ end }}
+        </ul>
+      </section>
+
+
+
+
+    </article>
+
+  </main>
+
+  </div>
+  
+  {{ if .image }}
+  <div class="image-block">
+    <img src="{{ .image }}" alt="Joshua Burke Los Angeles Marathon">
+    <div class="image-caption">Process / Observation</div>
+  </div>
+  {{ end }}
+</div>
+{{ end }}
+{{ end }}

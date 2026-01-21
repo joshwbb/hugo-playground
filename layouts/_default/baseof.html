@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="{{ .Lang }}">
+<head>
+ {{ partial "head" . }}
+ <script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body class="{{ .Type }}-page">
+  
+  <header>
+    {{ partial "header" . }}
+  </header>
+  <main>
+    {{ block "main" . }}{{ end }}
+  </main>
+  <footer>
+    {{ partial "footer" . }}
+  </footer>
+  {{ partial "scriptFooter" . }}
+  <script type="module" src="{{ "js/main.js" | relURL }}"></script>
+</body>
+</html>

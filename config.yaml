@@ -1,0 +1,48 @@
+baseURL: https://joshuab.work/
+title: Joshua Burke
+copyright: Joshua Burke
+languageCode: "en-us"
+defaultContentLanguage: "en-us"
+
+# Optimization: Only generate what you need
+disableKinds: ["taxonomy"]
+
+# Global Parameters for SEO
+params:
+  description: "Joshua Burke — Animator and Designer."
+  author: "Joshua Burke"
+  themeColor: "#fafafa"
+  # You can use this image for OpenGraph/Twitter cards
+  socialImage: "media/og-image.jpg"
+
+languages:
+  en-us:
+    weight: 1
+
+pagination: 
+  pagerSize: 10
+
+summaryLength: 7
+
+frontmatter:
+  date: ["lastmod", ":fileModTime", "date"]
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true # Required for your iframes and raw HTML
+
+sitemap:
+  changefreq: "monthly"
+  priority: 0.5
+  filename: "sitemap.xml"
+
+minify:
+  disableCSS: false
+  disableJS: false
+  disableHTML: false
+  tdewolff:
+    js:
+      keepVarNames: true # Crucial for SPA stability
+    html:
+      keepQuotes: true   # Safer for JS framework hydration

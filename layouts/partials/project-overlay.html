@@ -1,0 +1,43 @@
+{{ range where site.RegularPages "Section" "projects" }}
+<div class="project-page" id="{{ .Params.id }}">
+
+  <div class="project-carousel">
+    {{ with .Params.media }}
+      {{ partial "carousel.html" . }}
+    {{ end }}
+  </div>
+
+  <button class="project-close" aria-label="Close project">✕</button>
+
+  {{ with .Params.info }}
+    {{ $currentID := $.Params.id }}
+    <div class="info-tab">
+      <button class="info-button"
+              aria-expanded="false"
+              aria-controls="info-{{ $currentID }}">
+        i
+      </button>
+
+      <div class="info-content" id="info-{{ $currentID }}">
+        {{ with .year }}<p><strong>Year:</strong> {{ . }}</p>{{ end }}
+        {{ with .medium }}<p><strong>Medium:</strong> {{ . }}</p>{{ end }}
+        {{ with .client }}<p><strong>Client:</strong> {{ . }}</p>{{ end }}
+        {{ with .overview }}<p>{{ . }}</p>{{ end }}
+
+        {{ with .links }}
+          <ul class="info-links">
+            {{ range . }}
+              <li>
+                <a href="{{ .url }}" target="_blank" rel="noopener">
+                  {{ .label }}
+                </a>
+              </li>
+            {{ end }}
+          </ul>
+        {{ end }}
+      </div>
+    </div>
+  {{ end }}
+
+</div>
+{{ end }}

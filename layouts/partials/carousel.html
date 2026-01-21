@@ -1,0 +1,20 @@
+<div class="carousel-container" data-swipe="true">
+  <button class="carousel-arrow left" type="button" aria-label="Previous slide">‹</button>
+  
+  <div class="carousel-slides">
+    {{ $base := .media_base | default "/media/" }} 
+
+    {{ range .media }}
+<div class="carousel-slide" data-media-type="{{ .type }}">
+  {{ if eq .type "video" }}
+    {{ else if eq .type "3js" }}
+    {{ else }}
+    <img src="{{ .src }}" alt="...">
+  {{ end }}
+</div>
+
+    {{ end }}
+  </div>
+
+  <button class="carousel-arrow right" type="button" aria-label="Next slide">›</button>
+</div>
