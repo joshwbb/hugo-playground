@@ -27,14 +27,14 @@
 
         {{/* Display first media item as the card */}}
         {{ if or (eq $firstMedia.type "glb") (eq $firstMedia.type "3js") }}
-        <div class="three-card" data-model="{{ printf " %s%s" $base $firstMedia.model }}"
+        <div class="three-card" data-model="{{ printf "%s%s" $base $firstMedia.model }}"
           aria-label="{{ $firstMedia.alt | default .title }}"></div>
 
         {{ else if eq $firstMedia.type "video" }}
         {{/* Generate the poster path: replaces .webm with _thumb.webp */}}
         {{ $videoThumb := replace $firstMedia.src ".webm" "_thumb.webp" }}
 
-        <video class="card-main-media" src="{{ printf " %s%s" $base $firstMedia.src }}" poster="{{ printf " %s%s" $base
+        <video class="card-main-media" src="{{ printf "%s%s" $base $firstMedia.src }}" poster="{{ printf "%s%s" $base
           $videoThumb }}" autoplay loop muted playsinline {{ if ge $index 4 }} loading="lazy" {{ end }}>
         </video>
 
@@ -157,12 +157,12 @@
 
           {{ if $isFull }}
           <div class="media-fill-container">
-            <video src="{{ $fullSrc }}" poster="{{ printf " %s%s" $base $videoThumb }}" class="media-fill" autoplay loop
+            <video src="{{ $fullSrc }}" poster="{{ printf "%s%s" $base $videoThumb }}" class="media-fill" autoplay loop
               muted playsinline aria-label="{{ .alt | default $cardTitle }}">
             </video>
           </div>
           {{ else }}
-          <video src="{{ $fullSrc }}" poster="{{ printf " %s%s" $base $videoThumb }}" class="standard-video" autoplay
+          <video src="{{ $fullSrc }}" poster="{{ printf "%s%s" $base $videoThumb }}" class="standard-video" autoplay
             loop muted playsinline aria-label="{{ .alt | default $cardTitle }}">
           </video>
           {{ end }}

@@ -1,7 +1,7 @@
 // 1. Import THREE + loader
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js'; // Added
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // --- Global year update ---
@@ -10,10 +10,10 @@ if (yearEl) yearEl.innerHTML = new Date().getFullYear();
 
 // --- Global Draco Setup ---
 const dracoLoader = new DRACOLoader();
-dracoLoader.setDecoderPath('/js/draco/gltf/'); // Path updated to /js/draco/gltf/
+dracoLoader.setDecoderPath('/js/draco/gltf/');
 
 const sharedGLTFLoader = new GLTFLoader();
-sharedGLTFLoader.setDRACOLoader(dracoLoader); // DRACO implementation
+sharedGLTFLoader.setDRACOLoader(dracoLoader);
 
 // --- Three.js resize helper ---
 window.__resizeThreeCard = function (container) {
@@ -34,18 +34,13 @@ window.__resizeThreeCard = function (container) {
   const mobileWidth = 576; 
   const desktopWidth = 2175;
   
-  // 35 is your current "perfect" mobile FOV
-  // 18 is an "intense" zoom for large screens (Lower = Larger Model)
   const baseFOV = 35;
   const largeScreenFOV = 10; 
 
   if (w <= mobileWidth) {
-    // Keep your proportions exactly as they are on small screens
     camera.fov = baseFOV;
   } else {
-    // Gradually increase the model size as the screen gets wider
     const t = (w - mobileWidth) / (desktopWidth - mobileWidth);
-    // We use Math.min to ensure it doesn't zoom in forever
     const easedT = Math.min(Math.max(t, 0), 1); 
     
     camera.fov = baseFOV - (easedT * (baseFOV - largeScreenFOV));
@@ -82,7 +77,6 @@ function mountThreeScene(canvas) {
   camera.position.set(0, 2, 9.25);
   camera.lookAt(0, 0, 0);
 
-
   const renderer = new THREE.WebGLRenderer({
     canvas,
     alpha: true,
@@ -112,7 +106,6 @@ function mountThreeScene(canvas) {
     console.log('  OrbitControls enabled');
   }
 
-  // Load GLB with error handling
   console.log('📦 Loading GLB:', canvas.dataset.src);
   
   sharedGLTFLoader.load(
@@ -186,9 +179,6 @@ function cleanupThreeScenes(root) {
   });
 }
 
-
-
-
 document.addEventListener('DOMContentLoaded', () => {
 // --- 1. MASONRY SHUFFLE + CHIP INJECTION ---
 const masonry = document.querySelector('.masonry');
@@ -198,38 +188,30 @@ console.log('🔍 Masonry found:', !!masonry);
 console.log('🔍 Chip pool found:', !!chipPool);
 
 if (masonry) {
-  // ✅ STEP 1: Get all items and separate project cards from chips
   const allItems = Array.from(masonry.children);
   const projectCards = allItems.filter(item => !item.classList.contains('info-chip-item'));
   
-  // ✅ STEP 2: Shuffle project cards (Fisher-Yates)
   for (let i = projectCards.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [projectCards[i], projectCards[j]] = [projectCards[j], projectCards[i]];
   }
   
-  // ✅ STEP 3: Clear and add shuffled cards
   masonry.innerHTML = '';
   projectCards.forEach(card => masonry.appendChild(card));
   
-// ✅ STEP 4: Inject chips at random positions
 if (chipPool) {
   const chips = Array.from(chipPool.querySelectorAll('.info-chip-item'));
   const themes = ['black-theme', 'grey-theme', 'blue-theme', 'white-theme', 'inverse-theme'];
   
-  // 1. YOUR SHUFFLE: Keep your Fisher-Yates logic exactly as is
   for (let i = chips.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [chips[i], chips[j]] = [chips[j], chips[i]];
   }
 
-  // 2. CLEAN COLOR INTEGRATION: Assign themes based on the new shuffled order
   chips.forEach((chip, idx) => {
     const link = chip.querySelector('.grid-item');
     if (link) {
-      // Remove any existing theme classes
       link.classList.remove('black-theme', 'grey-theme', 'blue-theme', 'white-theme', 'inverse-theme');
-      // Apply the theme based on its index in the shuffled array
       link.classList.add(themes[idx % themes.length]);
     }
   });
@@ -239,7 +221,6 @@ if (chipPool) {
   const totalCards = projectCards.length;
   const numChips = chips.length;
   
-  // 3. YOUR POSITIONING: Keep your placement logic exactly as is
   const allPositions = Array.from({ length: totalCards + 1 }, (_, i) => i);
   
   for (let i = allPositions.length - 1; i > 0; i--) {
@@ -273,6 +254,7 @@ if (chipPool) {
   console.log('Project cards:', masonry.querySelectorAll('.masonry-item:not(.info-chip-item)').length);
   console.log('Chips:', masonry.querySelectorAll('.info-chip-item').length);
 }
+
   // --- 2. INTERNAL MEDIA SHUFFLE ---
   document.querySelectorAll('.image-card').forEach(card => {
     const poolData = card.dataset.pool;
@@ -340,31 +322,29 @@ if (chipPool) {
       targetPage.classList.add('is-active');
       document.body.style.overflow = 'hidden';
       
-      // Wait for carousel to be visible in DOM and painted
-requestAnimationFrame(() => {
-  requestAnimationFrame(() => {
-    initCarousel(targetPage);
-    
-    // Multi-stage resize for Three.js canvases
-    const resizeAll = () => {
-      targetPage.querySelectorAll('.threejs-scene').forEach(canvas => {
-        if (canvas.__threeRenderer) {
-          const container = canvas.parentElement;
-          const w = container.clientWidth;
-          const h = container.clientHeight;
-          if (w > 0 && h > 0) {
-            canvas.__threeRenderer.setSize(w, h, false);
-            canvas.__threeCamera.aspect = w / h;
-            canvas.__threeCamera.updateProjectionMatrix();
-          }
-        }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          initCarousel(targetPage);
+          
+          const resizeAll = () => {
+            targetPage.querySelectorAll('.threejs-scene').forEach(canvas => {
+              if (canvas.__threeRenderer) {
+                const container = canvas.parentElement;
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                if (w > 0 && h > 0) {
+                  canvas.__threeRenderer.setSize(w, h, false);
+                  canvas.__threeCamera.aspect = w / h;
+                  canvas.__threeCamera.updateProjectionMatrix();
+                }
+              }
+            });
+          };
+          resizeAll();
+          setTimeout(resizeAll, 100);
+          setTimeout(resizeAll, 500);
+        });
       });
-    };
-    resizeAll();
-    setTimeout(resizeAll, 100);
-    setTimeout(resizeAll, 500);
-  });
-});
     }
   }
   
@@ -381,7 +361,6 @@ requestAnimationFrame(() => {
 
     const slides = container.querySelector('.carousel-slides');
     
-    // Filter out thumbnail slides
     const slideElements = Array.from(slides.children).filter(slide => {
       const img = slide.querySelector('img');
       if (img && img.src.includes('_thumb')) {
@@ -398,7 +377,6 @@ requestAnimationFrame(() => {
     
     let index = 0;
 
-    // CRITICAL FIX: Immediately mount GLB on first slide
     const firstSlide = slideElements[0];
     if (firstSlide) {
       firstSlide.__isVisible = true;
@@ -409,7 +387,6 @@ requestAnimationFrame(() => {
       });
     }
 
-    // IntersectionObserver for slide changes
     const slideObserver = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
@@ -450,22 +427,74 @@ requestAnimationFrame(() => {
       }
     );
 
-    // Observe each slide
     slideElements.forEach(slide => {
       slideObserver.observe(slide);
+    });
+
+    // --- ADD HOLD-TO-PAUSE FOR CAROUSEL WEBM VIDEOS ---
+    console.log('🎥 Setting up hold-to-pause for carousel videos');
+    console.log('  Total slides:', slideElements.length);
+    
+    slideElements.forEach((slide, slideIdx) => {
+      const videos = slide.querySelectorAll('video');
+      console.log(`  Slide ${slideIdx}: found ${videos.length} video(s)`);
+      
+      videos.forEach((videoElement, vidIdx) => {
+        console.log(`    Video ${vidIdx} src:`, videoElement.src);
+        console.log(`    Is webm:`, videoElement.src.match(/\.webm$/i));
+        
+        if (!videoElement.src.match(/\.webm$/i)) {
+          console.log(`    ⏭️ Skipping (not webm)`);
+          return;
+        }
+
+        console.log(`    ✅ Adding hold-to-pause listeners`);
+        let isPausedByHold = false;
+
+        const startHold = (e) => {
+          console.log('🖱️ HOLD START:', e.type);
+          if (e.type === 'touchstart') e.preventDefault(); 
+          
+          if (!videoElement.paused) {
+            console.log('  ⏸️ Pausing video');
+            videoElement.pause();
+            isPausedByHold = true;
+          } else {
+            console.log('  Already paused');
+          }
+        };
+
+        const endHold = () => {
+          console.log('🖱️ HOLD END');
+          if (isPausedByHold) {
+            console.log('  ▶️ Resuming video');
+            videoElement.play().catch(() => {});
+            isPausedByHold = false;
+          }
+        };
+
+        videoElement.addEventListener('mousedown', startHold);
+        videoElement.addEventListener('mouseup', endHold);
+        videoElement.addEventListener('mouseleave', endHold);
+
+        videoElement.addEventListener('touchstart', startHold, { passive: false });
+        videoElement.addEventListener('touchend', endHold);
+        videoElement.addEventListener('touchcancel', endHold);
+        
+        console.log('    ✔️ Listeners attached');
+      });
     });
 
     const update = () => {
       slides.style.transform = `translateX(-${index * 100}%)`;
 
-      // Update .is-active class for CSS :has() logic
-  slideElements.forEach((slide, i) => {
-    if (i === index) {
-      slide.classList.add('is-active');
-    } else {
-      slide.classList.remove('is-active');
-    }
-  });
+      slideElements.forEach((slide, i) => {
+        if (i === index) {
+          slide.classList.add('is-active');
+        } else {
+          slide.classList.remove('is-active');
+        }
+      });
 
       console.log(`📍 Carousel at slide ${index + 1}/${slideCount}`);
     };
@@ -503,7 +532,6 @@ requestAnimationFrame(() => {
       });
     }
 
-    // Mobile swipe
     if (window.matchMedia('(pointer: coarse)').matches) {
       let startX = 0;
       let startY = 0;
@@ -601,48 +629,42 @@ requestAnimationFrame(() => {
   }
   
   document.querySelectorAll('.project-close').forEach(btn => btn.addEventListener('click', closeProject));
-  // --- Updated Keyboard Controller ---
-window.addEventListener('keydown', (e) => {
-  // 1. ESC to Close Project
-  if (e.key === 'Escape') {
-    closeProject();
-  }
 
-  // Only run the following if a project overlay is active
-  const activePage = document.querySelector('.project-page.is-active');
-  if (!activePage) return;
-
-  const key = e.key.toLowerCase(); // Standardize input
-
-  // 2. "I" for Info Tab
-  if (key === 'i') {
-    // Find the info button within the currently active project
-    const infoBtn = activePage.querySelector('.info-button');
-    if (infoBtn) infoBtn.click();
-  }
-
-  // 3. "F" for Fullscreen
-  if (key === 'f') {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(err => {
-        console.warn(`Fullscreen error: ${err.message}`);
-      });
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen();
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeProject();
     }
-  }
 
-  // 4. Arrows for Carousel
-  if (e.key === 'ArrowRight') {
-    const nextBtn = activePage.querySelector('.carousel-arrow.right');
-    if (nextBtn) nextBtn.click();
-  } 
-  
-  if (e.key === 'ArrowLeft') {
-    const prevBtn = activePage.querySelector('.carousel-arrow.left');
-    if (prevBtn) prevBtn.click();
-  }
-});
+    const activePage = document.querySelector('.project-page.is-active');
+    if (!activePage) return;
+
+    const key = e.key.toLowerCase();
+
+    if (key === 'i') {
+      const infoBtn = activePage.querySelector('.info-button');
+      if (infoBtn) infoBtn.click();
+    }
+
+    if (key === 'f') {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn(`Fullscreen error: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    if (e.key === 'ArrowRight') {
+      const nextBtn = activePage.querySelector('.carousel-arrow.right');
+      if (nextBtn) nextBtn.click();
+    } 
+    
+    if (e.key === 'ArrowLeft') {
+      const prevBtn = activePage.querySelector('.carousel-arrow.left');
+      if (prevBtn) prevBtn.click();
+    }
+  });
 
   // --- 5. Info tabs ---
   document.querySelectorAll('.info-tab').forEach(tab => {
@@ -668,15 +690,13 @@ window.addEventListener('keydown', (e) => {
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
-  camera.position.set(0, 3, 8);
+    camera.position.set(0, 3, 8);
     camera.lookAt(0, 1.5, -3.5);
-
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(container.clientWidth, container.clientHeight, false);
     container.appendChild(renderer.domElement);
-    
 
     renderer.domElement.__threeRenderer = renderer;
     renderer.domElement.__threeCamera = camera;
@@ -768,11 +788,9 @@ window.addEventListener('keydown', (e) => {
 
     if (targetOverlay) {
       e.preventDefault();
-      
-      
-      
       history.pushState(null, null, `#${targetId}`);
       showProjectByHash();
     }
   });
+
 });

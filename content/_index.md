@@ -327,10 +327,15 @@ cards:
     - type: image
       src: 105_thumb.webp
       alt: "Ice Spice, fisheye lens"
+    - type: video
+      src: 107.webm
+      alt: "Ice Spice, fisheye lens"
     - type: image
-      src: 102.webp
+      src: 108.webp
       layout: fullscreen
-      alt: "Ice Spice, fisheye lens" 
+    - type: image
+      src: 109.webp
+      layout: fullscreen
     - type: image
       src: 103.webp
       layout: fullscreen
@@ -345,9 +350,6 @@ cards:
     - type: image
       src: 106.webp
       layout: fullscreen
-      alt: "Ice Spice, fisheye lens"
-    - type: video
-      src: 107.webm
       alt: "Ice Spice, fisheye lens"
   info:
     year: 2022
@@ -457,7 +459,7 @@ cards:
     year: 2022
     medium: 30 fps
     client: Personal Project
-    overview: Hand Animation, Motion Capture, Marvelous Designer, Simulation
+    overview: Motion Capture, Marvelous Designer, Simulation
     links: ""
 
 
